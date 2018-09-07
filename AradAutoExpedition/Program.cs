@@ -50,44 +50,93 @@ namespace AradAutoExpedition
             MouseLeftClick();
         }
 
+        static Process GetDNFProcess()
+        {
+            var process = Process.GetProcessesByName("ARAD");
+            if (!process.Any())
+            {
+                process = Process.GetProcessesByName("DFO");
+            }
+
+            if (!process.Any())
+            {
+                Console.WriteLine("DNF is not running");
+                return null;
+            }
+
+            return process.First();
+        }
+
+        static void RunMacro(RECT rect)
+        {
+            if (rect.Width == 1600 && rect.Height == 900)
+            {
+                var dungeons = new List<Point>();
+                dungeons.Add(new Point(400, 507));
+                dungeons.Add(new Point(400, 417));
+                dungeons.Add(new Point(400, 327));
+                dungeons.Add(new Point(400, 218));
+
+                foreach (var dungeon in dungeons)
+                {
+                    MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
+                    MouseMoveAndLeftClick(814, 666);
+                    MouseMoveAndLeftClick(783, 760);
+                    MouseMoveAndLeftClick(940, 530);
+                    MouseMoveAndLeftClick(631, 786);
+                    MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
+                    MouseMoveAndLeftClick(935, 763);
+                    MouseMoveAndLeftClick(748, 603);
+                    MouseMoveAndLeftClick(800, 600);
+                }
+            }
+            else if (rect.Width == 800 && rect.Height == 600)
+            {
+                var dungeons = new List<Point>();
+                dungeons.Add(new Point(120, 340));
+                dungeons.Add(new Point(120, 280));
+                dungeons.Add(new Point(120, 220));
+                dungeons.Add(new Point(120, 160));
+
+                foreach (var dungeon in dungeons)
+                {
+                    MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
+                    MouseMoveAndLeftClick(410, 440);
+                    MouseMoveAndLeftClick(380, 508);
+                    MouseMoveAndLeftClick(493, 354);
+                    MouseMoveAndLeftClick(290, 520);
+                    MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
+                    MouseMoveAndLeftClick(490, 505);
+                    MouseMoveAndLeftClick(360, 400);
+                    MouseMoveAndLeftClick(400, 400);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
-            var pid = Process.GetProcessesByName("ARAD").First().Id;
-            var hWnd = Process.GetProcessesByName("ARAD").First().MainWindowHandle;
+            var process = GetDNFProcess();
+
+            var pid = process.Id;
+            var hWnd = process.MainWindowHandle;
             if (hWnd != IntPtr.Zero)
             {
                 GetClientRect(hWnd, out var rect);
 
-                if (rect.Width != 1600 || rect.Height != 900)
+                if (
+                    !(rect.Width == 1600 && rect.Height == 900) &&
+                    !(rect.Width == 800 && rect.Height == 600)
+                   )
                 {
-                    Console.WriteLine("アラド戦記の解像度を1600x900に設定して下さい。");
+                    Console.WriteLine("Please set resolution 1600x900 or 800x600");
                     return;
                 }
 
                 MoveWindow(hWnd, 0, 0, rect.Width, rect.Height, true);
-            }
+                Microsoft.VisualBasic.Interaction.AppActivate(pid);
+                Thread.Sleep(500);
 
-            Microsoft.VisualBasic.Interaction.AppActivate(pid);
-
-            Thread.Sleep(500);
-
-            var dungeons = new List<Point>();
-            dungeons.Add(new Point(400, 507));
-            dungeons.Add(new Point(400, 417));
-            dungeons.Add(new Point(400, 327));
-            dungeons.Add(new Point(400, 218));
-
-            foreach (var dungeon in dungeons)
-            {
-                MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
-                MouseMoveAndLeftClick(814, 666);
-                MouseMoveAndLeftClick(783, 760);
-                MouseMoveAndLeftClick(940, 530);
-                MouseMoveAndLeftClick(631, 786);
-                MouseMoveAndLeftClick(dungeon.X, dungeon.Y);
-                MouseMoveAndLeftClick(935, 763);
-                MouseMoveAndLeftClick(748, 603);
-                MouseMoveAndLeftClick(800, 600);
+                RunMacro(rect);
             }
         }
     }
